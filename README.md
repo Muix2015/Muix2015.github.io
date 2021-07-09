@@ -2,7 +2,7 @@
 
 #### Web Front-End Engineer
 
-![](https://raw.githubusercontent.com/Shawn/cv/gh-pages/img/cv.png)
+![](https://raw.githubusercontent.com/Ovilia/cv/gh-pages/img/cv.png)
 
 Designed and Implemented by Shawn
 
@@ -12,6 +12,11 @@ Third-party library: [pagePiling.js](https://github.com/alvarotrigo/pagePiling.j
 
 Tools: SCSS, bower, gulp
 
+### PDF Version
+
+Source: [InDesign Source File](https://raw.githubusercontent.com/Ovilia/cv/gh-pages/res/cv.indd)
+
+Tools: InDesign
 
 ### About Permission
 
@@ -23,7 +28,7 @@ The project is open-sourced under MIT license. You can use either Online or PDF 
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Shawn
+Copyright (c) 2015 Ovilia
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
