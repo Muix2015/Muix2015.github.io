@@ -1,0 +1,27 @@
+{
+  "name": "Shawn's CV",
+  "version": "1.0.0",
+  "homepage": "Muix2015.github.io/cv",
+  "authors": [
+    "Shawn"
+  ],
+  "description": "Web Designer and Developer",
+  "keywords": [
+    "CV",
+    "Web Designer",
+    "Web Developer",
+    "Web Front-end"
+  ],
+  "license": "CC BY 3.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "pagepiling.js": "~0.0.7"
+  }
+}
+
