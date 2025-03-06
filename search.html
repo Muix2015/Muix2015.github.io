@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能检索 - 大模型文档系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%);
+            height: 1280px;
+        }
+        .main-content {
+            height: 1280px;
+            overflow-y: auto;
+        }
+        .nav-item {
+            transition: background-color 0.2s;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .nav-item.active {
+            border-left: 4px solid white;
+        }
+        .profile-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: #10b981;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border: 2px solid white;
+        }
+        .search-box {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .search-box:focus-within {
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        .ai-badge {
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+        }
+        .ai-highlight {
+            position: relative;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-left: 3px solid #3b82f6;
+            padding: 8px 12px;
+            margin: 12px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .filter-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .filter-item:hover {
+            background-color: #f1f5f9;
+        }
+        .filter-item.active {
+            background-color: #e0f2fe;
+            border-color: #3b82f6;
+        }
+        .result-card {
+            transition: all 0.2s ease;
+            border-radius: 12px;
+        }
+        .result-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+        .tag {
+            border-radius: 16px;
+            padding: 2px 10px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        .tag:hover {
+            transform: scale(1.05);
+        }
+        .knowledge-map {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            height: 400px;
+        }
+        .relevance-indicator {
+            width: 6px;
+            height: 60px;
+            border-radius: 3px;
+        }
+        .suggestion-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex" style="width: 1920px; height: 1280px;">
+        <!-- 侧边栏 -->
+        <div class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 flex items-center space-x-3">
+                <i class="fas fa-file-contract text-2xl"></i>
+                <span class="text-xl font-bold">文档系统</span>
+            </div>
+            
+            <div class="px-4 py-6">
+                <ul class="space-y-2">
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-home"></i>
+                            <span>首页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-search"></i>
+                            <span>智能检索</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-file-alt"></i>
+                            <span>文档生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-check-circle"></i>
+                            <span>合规审核</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>数据分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-cog"></i>
+                            <span>系统设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="mt-auto p-4">
+                <div class="border-t border-blue-400 pt-4">
+                    <div class="flex items-center space-x-3 p-2">
+                        <div class="relative">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                            <span class="profile-indicator"></span>
+                        </div>
+                        <div>
+                            <p class="font-medium">李明</p>
+                            <p class="text-sm text-blue-200">管理员</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content flex-1 p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold text-gray-800">智能检索</h1>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="p-2 rounded-full text-gray-500 hover:bg-gray-100">
+                            <i class="fas fa-bell"></i>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 搜索框和过滤器区域 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="flex flex-col space-y-6">
+                    <!-- 搜索框 -->
+                    <div class="relative">
+                        <h2 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                            智能检索
+                            <span class="ai-badge">
+                                <i class="fas fa-robot mr-1"></i> AI增强
+                            </span>
+                        </h2>
+                        <p class="text-sm text-gray-600 mb-4">我们的AI系统已整理了所有历史数据，您可以通过自然语言描述需求，快速找到相关文档</p>
+                        
+                        <div class="search-box flex items-center border-2 border-gray-200 rounded-xl overflow-hidden p-1 pr-3 bg-white">
+                            <input type="text" placeholder="使用自然语言描述您需要的文档内容..." class="w-full py-3 px-5 focus:outline-none text-gray-700" value="科研项目 人工智能 合作">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-5 rounded-lg ml-3 flex items-center">
+                                <i class="fas fa-search mr-2"></i>
+                                <span>搜索</span>
+                            </button>
+                        </div>
+                        
+                        <!-- 搜索建议 -->
+                        <div class="absolute top-full left-0 right-0 bg-white mt-2 rounded-xl shadow-lg p-3 z-10">
+                            <div class="flex items-center mb-2">
+                                <p class="text-sm text-gray-500">智能推荐：</p>
+                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2">基于您的搜索历史</span>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="suggestion-item flex items-center p-2 rounded-lg">
+                                    <i class="fas fa-history text-gray-400 mr-3"></i>
+                                    <span>人工智能科研项目申请书</span>
+                                </div>
+                                <div class="suggestion-item flex items-center p-2 rounded-lg">
+                                    <i class="fas fa-history text-gray-400 mr-3"></i>
+                                    <span>2023年度科研合作协议模板</span>
+                                </div>
+                                <div class="suggestion-item flex items-center p-2 rounded-lg">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-3"></i>
+                                    <span>人工智能技术在科研项目中的应用及合作模式</span>
+                                </div>
+                            </div>
+                            <div class="ai-highlight mt-3">
+                                <div class="flex items-center text-sm text-blue-700">
+                                    <i class="fas fa-robot mr-2"></i>
+                                    <span class="font-medium">AI检索建议</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">尝试更精确的搜索语句："寻找含有人工智能技术合作方案的科研项目申请文档"</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 过滤器 -->
+                    <div class="grid grid-cols-4 gap-6">
+                        <!-- 时间范围 -->
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">时间范围</h3>
+                            <div class="space-y-2">
+                                <div class="filter-item active flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">全部时间</span>
+                                    <i class="fas fa-check text-blue-600"></i>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">最近一周</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">最近一个月</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">最近一年</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">自定义...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 文档类型 -->
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">文档类型</h3>
+                            <div class="space-y-2">
+                                <div class="filter-item active flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">全部类型</span>
+                                    <i class="fas fa-check text-blue-600"></i>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-word text-blue-500 mr-2"></i>
+                                        <span class="text-sm">研究报告</span>
+                                    </div>
+                                    <span class="text-xs text-gray-500">214</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-contract text-yellow-500 mr-2"></i>
+                                        <span class="text-sm">合同文档</span>
+                                    </div>
+                                    <span class="text-xs text-gray-500">87</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-alt text-green-500 mr-2"></i>
+                                        <span class="text-sm">技术规范</span>
+                                    </div>
+                                    <span class="text-xs text-gray-500">56</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-ellipsis-h text-gray-500 mr-2"></i>
+                                        <span class="text-sm">更多类型...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 部门/单位 -->
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">部门/单位</h3>
+                            <div class="space-y-2">
+                                <div class="filter-item active flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">全部部门</span>
+                                    <i class="fas fa-check text-blue-600"></i>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">研究一部</span>
+                                    <span class="text-xs text-gray-500">142</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">研究二部</span>
+                                    <span class="text-xs text-gray-500">98</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">合作发展部</span>
+                                    <span class="text-xs text-gray-500">76</span>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <span class="text-sm">更多部门...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 搜索偏好 -->
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">搜索偏好</h3>
+                            <div class="space-y-2">
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-sort-amount-down text-blue-600 mr-2"></i>
+                                        <span class="text-sm">按相关度排序</span>
+                                    </div>
+                                    <i class="fas fa-check text-blue-600"></i>
+                                </div>
+                                <div class="filter-item flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>
+                                        <span class="text-sm">按时间排序</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 border border-gray-200 rounded-lg bg-blue-50">
+                                    <div class="flex items-center mb-2">
+                                        <input type="checkbox" id="use_ai" class="mr-2" checked>
+                                        <label for="use_ai" class="text-sm font-medium text-gray-700">启用AI增强搜索</label>
+                                    </div>
+                                    <p class="text-xs text-gray-600">使用语义理解和上下文关联，提高搜索准确度</p>
+                                </div>
+                                <div class="p-3 border border-gray-200 rounded-lg bg-green-50">
+                                    <div class="flex items-center mb-2">
+                                        <input type="checkbox" id="historical_data" class="mr-2" checked>
+                                        <label for="historical_data" class="text-sm font-medium text-gray-700">历史数据整合</label>
+                                    </div>
+                                    <p class="text-xs text-gray-600">AI会分析历史相关文档，整合相关信息作为参考</p>
+                                </div>
+                                <div class="p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-center mb-2">
+                                        <input type="checkbox" id="full_text" class="mr-2" checked>
+                                        <label for="full_text" class="text-sm font-medium text-gray-700">全文检索</label>
+                                    </div>
+                                    <p class="text-xs text-gray-600">在文档全文中搜索，而不仅限于标题和元数据</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 搜索结果区域 -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center">
+                        <h2 class="text-lg font-medium text-gray-800">搜索结果 <span class="text-blue-600">358</span> 条</h2>
+                        <span class="ml-3 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full flex items-center">
+                            <i class="fas fa-check-circle mr-1"></i>AI已优化排序
+                        </span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500">
+                        搜索耗时：<span class="text-blue-600 font-medium ml-1">0.42秒</span>
+                    </div>
+                </div>
+                
+                <div class="ai-highlight mb-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center text-sm text-blue-700">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            <span class="font-medium">智能摘要</span>
+                        </div>
+                        <button class="text-xs text-gray-500 hover:text-blue-600">
+                            <i class="fas fa-thumbs-up mr-1"></i>有帮助
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-2">您搜索的内容主要涉及人工智能领域的科研项目合作。相关文档包括项目申请书模板、技术合作协议、研究报告和会议记录，时间跨度为2022-2023年，主要来源于研究一部、研究二部和合作发展部。</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- 结果条目 1 -->
+                    <div class="result-card border border-gray-100 p-5 rounded-xl flex items-start">
+                        <div class="relevance-indicator bg-blue-600 mr-4 self-stretch"></div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-medium text-gray-800">
+                                    <i class="fas fa-file-word text-blue-500 mr-2"></i>
+                                    <a href="#" class="hover:text-blue-600">人工智能科研项目申请书模板V2.1</a>
+                                </h3>
+                                <div class="flex items-center space-x-1">
+                                    <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-3">
+                                项目申请书规范了<span class="bg-yellow-100 px-1">科研项目</span>的总体架构和内容要求，便于评审专家全面了解<span class="bg-yellow-100 px-1">人工智能</span>研究方案。申请书包括项目背景、研究目标、技术路线、预期成果、团队构成、经费预算等章节...
+                            </p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="tag bg-blue-100 text-blue-700">申请书</span>
+                                    <span class="tag bg-green-100 text-green-700">人工智能</span>
+                                    <span class="tag bg-purple-100 text-purple-700">模板文档</span>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <span>研究一部</span>
+                                    <span class="mx-2">|</span>
+                                    <span>更新于：2023-06-15</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 结果条目 2 -->
+                    <div class="result-card border border-gray-100 p-5 rounded-xl flex items-start">
+                        <div class="relevance-indicator bg-blue-500 mr-4 self-stretch"></div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-medium text-gray-800">
+                                    <i class="fas fa-file-contract text-yellow-500 mr-2"></i>
+                                    <a href="#" class="hover:text-blue-600">2023年度人工智能技术合作协议</a>
+                                </h3>
+                                <div class="flex items-center space-x-1">
+                                    <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-3">
+                                本协议规范了我院与北京某大学在<span class="bg-yellow-100 px-1">人工智能</span>领域的<span class="bg-yellow-100 px-1">合作</span>关系，包括但不限于联合<span class="bg-yellow-100 px-1">科研项目</span>申报、技术开发、人才培养等方面的权责划分和利益分配机制...
+                            </p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="tag bg-yellow-100 text-yellow-700">合作协议</span>
+                                    <span class="tag bg-green-100 text-green-700">人工智能</span>
+                                    <span class="tag bg-red-100 text-red-700">重要文档</span>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <span>合作发展部</span>
+                                    <span class="mx-2">|</span>
+                                    <span>更新于：2023-05-21</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 结果条目 3 -->
+                    <div class="result-card border border-gray-100 p-5 rounded-xl flex items-start">
+                        <div class="relevance-indicator bg-blue-400 mr-4 self-stretch"></div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-medium text-gray-800">
+                                    <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                                    <a href="#" class="hover:text-blue-600">人工智能赋能传统产业研究报告</a>
+                                </h3>
+                                <div class="flex items-center space-x-1">
+                                    <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-3">
+                                本报告分析了<span class="bg-yellow-100 px-1">人工智能</span>技术在制造、农业、医疗等传统行业的应用场景和发展趋势，通过案例研究和数据分析，阐述了AI技术如何提升生产效率和创新能力，并提出了产学研<span class="bg-yellow-100 px-1">合作</span>的建议...
+                            </p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="tag bg-blue-100 text-blue-700">研究报告</span>
+                                    <span class="tag bg-green-100 text-green-700">人工智能</span>
+                                    <span class="tag bg-orange-100 text-orange-700">产业应用</span>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <span>研究二部</span>
+                                    <span class="mx-2">|</span>
+                                    <span>更新于：2023-04-10</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 结果条目 4 -->
+                    <div class="result-card border border-gray-100 p-5 rounded-xl flex items-start">
+                        <div class="relevance-indicator bg-blue-300 mr-4 self-stretch"></div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-medium text-gray-800">
+                                    <i class="fas fa-file-powerpoint text-orange-500 mr-2"></i>
+                                    <a href="#" class="hover:text-blue-600">2022年度科研项目立项评审会议记录</a>
+                                </h3>
+                                <div class="flex items-center space-x-1">
+                                    <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-3">
+                                会议对15个<span class="bg-yellow-100 px-1">科研项目</span>进行了立项评审，其中<span class="bg-yellow-100 px-1">人工智能</span>相关项目7个，批准立项5个，包括"基于深度学习的文本分类系统"、"人机交互关键技术研究"等，并就校企<span class="bg-yellow-100 px-1">合作</span>项目进行了讨论...
+                            </p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="tag bg-orange-100 text-orange-700">会议记录</span>
+                                    <span class="tag bg-blue-100 text-blue-700">项目评审</span>
+                                    <span class="tag bg-green-100 text-green-700">人工智能</span>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <span>科研管理处</span>
+                                    <span class="mx-2">|</span>
+                                    <span>更新于：2022-12-15</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-between items-center">
+                    <div class="text-sm text-gray-500">
+                        显示 1 至 4，共 358 条结果
+                    </div>
+                    <div class="flex space-x-1">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50" disabled>上一页</button>
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded-md">1</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">2</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">3</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">...</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">90</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">下一页</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 知识图谱 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center mb-4">
+                    <h2 class="text-lg font-medium text-gray-800">知识关联图谱</h2>
+                    <span class="ai-badge ml-3">
+                        <i class="fas fa-brain mr-1"></i> AI生成
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">根据您的搜索内容"科研项目 人工智能 合作"，AI系统自动整理了历史数据，生成了以下关联图谱，展示相关研究项目与主题的关系</p>
+                
+                <div class="knowledge-map overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1535016120720-40c646be5580?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80" class="w-full h-full object-cover" alt="知识图谱">
+                </div>
+                
+                <div class="mt-4 flex justify-between">
+                    <button class="flex items-center text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-file-export mr-2"></i>
+                        <span>导出关联数据</span>
+                    </button>
+                    <button class="flex items-center text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-expand-alt mr-2"></i>
+                        <span>查看完整知识图谱</span>
+                    </button>
+                </div>
+                
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-robot text-blue-600 mr-2"></i>
+                        <h3 class="font-medium text-gray-800">相关推荐</h3>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">基于历史数据分析，您可能还对以下内容感兴趣：</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="#" class="p-3 bg-white rounded-lg hover:shadow-md transition-shadow">
+                            <p class="text-sm font-medium text-gray-700">《2023年人工智能技术发展趋势报告》</p>
+                            <p class="text-xs text-gray-500 mt-1">研究二部 | 文档类型：研究报告</p>
+                        </a>
+                        <a href="#" class="p-3 bg-white rounded-lg hover:shadow-md transition-shadow">
+                            <p class="text-sm font-medium text-gray-700">《科研项目经费管理办法（2023版）》</p>
+                            <p class="text-xs text-gray-500 mt-1">科研管理处 | 文档类型：规章制度</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

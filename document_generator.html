@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档生成 - 大模型文档系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%);
+            height: 1280px;
+        }
+        .main-content {
+            height: 1280px;
+            overflow-y: auto;
+        }
+        .nav-item {
+            transition: background-color 0.2s;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .nav-item.active {
+            border-left: 4px solid white;
+        }
+        .template-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+        .template-card.selected {
+            border: 2px solid #3b82f6;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
+        }
+        .field-group {
+            transition: all 0.3s ease;
+        }
+        .field-group:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .profile-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: #10b981;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border: 2px solid white;
+        }
+        .template-image {
+            height: 140px;
+            object-fit: cover;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .ai-suggestion {
+            border-left: 3px solid #3b82f6;
+            transition: all 0.2s ease;
+        }
+        .ai-suggestion:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .ai-badge {
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+        }
+        .feature-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #f0f9ff;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 11px;
+            margin-right: 6px;
+        }
+        .document-preview {
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+        }
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.5s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-6px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flex" style="width: 1920px; height: 1280px;">
+        <!-- 侧边栏 -->
+        <div class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 flex items-center space-x-3">
+                <i class="fas fa-file-contract text-2xl"></i>
+                <span class="text-xl font-bold">文档系统</span>
+            </div>
+            
+            <div class="px-4 py-6">
+                <ul class="space-y-2">
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-home"></i>
+                            <span>首页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-search"></i>
+                            <span>智能检索</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-file-alt"></i>
+                            <span>文档生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-check-circle"></i>
+                            <span>合规审核</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>数据分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-cog"></i>
+                            <span>系统设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="mt-auto p-4">
+                <div class="border-t border-blue-400 pt-4">
+                    <div class="flex items-center space-x-3 p-2">
+                        <div class="relative">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                            <span class="profile-indicator"></span>
+                        </div>
+                        <div>
+                            <p class="font-medium">李明</p>
+                            <p class="text-sm text-blue-200">管理员</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content flex-1 p-8">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">文档生成</h1>
+                    <span class="ai-badge ml-3">
+                        <i class="fas fa-robot mr-1"></i> AI驱动
+                    </span>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="p-2 rounded-full text-gray-500 hover:bg-gray-100">
+                            <i class="fas fa-bell"></i>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 系统说明 -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl mb-6">
+                <div class="flex items-start">
+                    <div class="text-blue-600 mr-3 mt-1">
+                        <i class="fas fa-info-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-gray-800 mb-1">AI驱动的智能文档生成</h3>
+                        <p class="text-sm text-gray-600">本系统能基于历史数据和标准模板，快速生成高质量文档。AI会智能分析您的需求，提供个性化建议，并自动填充相关内容。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 生成步骤进度 -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <div class="h-2 bg-blue-600 rounded-full" style="width: 33.33%"></div>
+                            <div class="h-2 bg-gray-200 rounded-full absolute top-0 left-0 right-0"></div>
+                            <div class="h-2 bg-blue-600 rounded-full absolute top-0 left-0" style="width: 33.33%"></div>
+                        </div>
+                        <div class="flex justify-between mt-2 text-sm">
+                            <div class="text-blue-600 font-medium">1. 选择模板</div>
+                            <div class="text-blue-600 font-medium">2. 填写信息</div>
+                            <div class="text-gray-400">3. 预览与导出</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-6">
+                <!-- 左侧：模板选择和基本信息填写 -->
+                <div class="col-span-1">
+                    <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
+                        <h3 class="font-medium text-gray-800 mb-4">选择文档模板</h3>
+                        <div class="mb-4">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索模板..." class="w-full p-3 pl-10 border border-gray-300 rounded-lg">
+                                <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="template-card selected bg-white shadow-sm overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="科研项目申请书" class="template-image w-full">
+                                <div class="p-4">
+                                    <div class="flex items-center mb-1">
+                                        <h4 class="font-medium text-gray-800">科研项目申请书</h4>
+                                        <span class="ai-badge ml-2 scale-75">AI优化</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">适用于各类科研项目申请与立项</p>
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        <span class="feature-tag">智能填充</span>
+                                        <span class="feature-tag">格式标准化</span>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="text-xs text-gray-500">使用次数：452</span>
+                                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">推荐</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card bg-white shadow-sm overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="技术合作协议" class="template-image w-full">
+                                <div class="p-4">
+                                    <h4 class="font-medium text-gray-800">技术合作协议</h4>
+                                    <p class="text-sm text-gray-500 mt-1">规范技术合作关系与权责划分</p>
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="text-xs text-gray-500">使用次数：315</span>
+                                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">常用</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="template-card bg-white shadow-sm overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1543286386-713bdd548da4?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="年度工作总结" class="template-image w-full">
+                                <div class="p-4">
+                                    <h4 class="font-medium text-gray-800">年度工作总结</h4>
+                                    <p class="text-sm text-gray-500 mt-1">全面回顾年度工作成效与挑战</p>
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="text-xs text-gray-500">使用次数：287</span>
+                                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">常用</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm flex items-center justify-center w-full">
+                                <span>查看更多模板</span>
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 中间：填写字段和AI建议 -->
+                <div class="col-span-2">
+                    <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-medium text-gray-800">项目基本信息</h3>
+                            
+                            <div class="flex items-center text-sm text-blue-600">
+                                <i class="fas fa-magic mr-2"></i>
+                                <span>智能填充</span>
+                                <i class="fas fa-question-circle ml-1 text-xs text-gray-400 hover:text-blue-500" title="系统将基于历史数据自动填充相关信息"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-5">
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                                <input type="text" value="基于人工智能的历史文献智能处理与应用系统" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">项目类型</label>
+                                <select class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option>基础研究</option>
+                                    <option>应用研究</option>
+                                    <option selected>技术开发</option>
+                                    <option>成果转化</option>
+                                    <option>其他</option>
+                                </select>
+                            </div>
+                            
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">研究领域</label>
+                                <div class="flex flex-wrap gap-2 mb-2">
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center">
+                                        人工智能
+                                        <button class="ml-1 text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </span>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center">
+                                        大数据处理
+                                        <button class="ml-1 text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </span>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center">
+                                        自然语言处理
+                                        <button class="ml-1 text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="relative">
+                                    <input type="text" placeholder="添加更多领域..." class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div class="mt-2 text-xs text-gray-500 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+                                    系统已基于历史数据推荐相关领域标签
+                                </div>
+                            </div>
+                            
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">项目负责人</label>
+                                <input type="text" value="张文" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">执行周期</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">开始日期</label>
+                                        <input type="date" value="2023-09-01" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">结束日期</label>
+                                        <input type="date" value="2025-08-31" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">预算金额（万元）</label>
+                                <input type="number" value="120" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-5">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-medium text-gray-800">项目内容</h3>
+                            <div class="flex items-center text-sm text-blue-600">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                <span>生成建议</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-xs bg-yellow-50 text-yellow-700 p-3 rounded-lg mb-5">
+                            <div class="flex items-center mb-1">
+                                <i class="fas fa-history mr-1"></i>
+                                <span class="font-medium">历史数据利用</span>
+                            </div>
+                            <p>系统将分析过去2年内的150份相关文档，为您提供智能建议和内容参考</p>
+                        </div>
+                        
+                        <div class="space-y-5">
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">研究背景与意义</label>
+                                <textarea rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">随着信息技术的飞速发展，各组织机构积累了大量的历史文献和档案资料。然而，传统的文档管理方式难以满足高效检索和知识提取的需求。本项目旨在利用人工智能技术，构建一个智能文献处理系统，实现历史资料的数字化、结构化和智能化管理，为科研工作和决策支持提供有力工具。</textarea>
+                                <div class="mt-2">
+                                    <div class="ai-suggestion bg-blue-50 p-3 rounded-lg">
+                                        <div class="flex items-center mb-2">
+                                            <i class="fas fa-robot text-blue-600 mr-2"></i>
+                                            <span class="text-sm text-blue-700 font-medium">AI建议</span>
+                                            <span class="ml-2 text-xs text-gray-500">基于历史成功案例分析</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">建议补充当前国内外相关技术的发展现状和本项目的创新点。可以提及：</p>
+                                        <p class="text-sm text-gray-600 mt-1">1. 国际上已有的类似系统存在精确度不足、语言模型局限性等问题</p>
+                                        <p class="text-sm text-gray-600">2. 本项目将结合多模态技术，针对专业领域文献进行优化</p>
+                                        <div class="flex justify-end mt-2">
+                                            <button class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">应用建议</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">研究目标</label>
+                                <textarea rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">1. 建立基于大型语言模型的文献解析引擎，实现对60年历史档案的高效数字化
+2. 开发智能检索系统，支持语义理解和多维度查询
+3. 构建文档智能生成模块，实现标准文件的快速定制化生成
+4. 开发文本合规性审核子系统，提供智能审核和修改建议</textarea>
+                            </div>
+                            
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">技术路线</label>
+                                <div class="relative">
+                                    <div class="absolute top-0 left-0 right-0 bottom-0 bg-gray-50 flex flex-col items-center justify-center rounded-lg">
+                                        <div class="typing-indicator mb-2">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">AI正在分析历史文档并生成内容...</p>
+                                        <p class="text-xs text-gray-500 mt-1">参考了32份相似项目的技术路线</p>
+                                    </div>
+                                    <textarea rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent opacity-0"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="field-group p-3 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">预期成果</label>
+                                <textarea rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">1. 文献智能处理系统一套，包含文本识别、结构化和知识提取等模块
+2. 智能检索引擎及用户界面
+3. 智能文档生成系统
+4. 合规审核子系统
+5. 相关技术专利3-5项
+6. 学术论文2-3篇</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧：预览 -->
+                <div class="col-span-1">
+                    <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-medium text-gray-800">文档预览</h3>
+                            <span class="text-xs text-blue-600">实时更新</span>
+                        </div>
+                        <div class="document-preview h-96 mb-4 relative">
+                            <img src="https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="文档预览" class="absolute inset-0 w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
+                                <button class="mb-3 bg-white text-blue-600 px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-eye mr-2"></i>
+                                    <span>预览完整文档</span>
+                                </button>
+                                <p class="text-white text-sm">文档自动保存中...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                            <div class="flex items-start">
+                                <div class="bg-blue-600 text-white p-2 rounded-full mr-3">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-blue-800 font-medium mb-1">AI辅助</h4>
+                                    <p class="text-sm text-blue-700">AI已根据历史数据和您的输入生成文档草稿，您可以随时编辑和完善</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium flex items-center justify-center">
+                                <i class="fas fa-magic mr-2"></i>
+                                <span>一键生成完整文档</span>
+                            </button>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded-lg">
+                                    <i class="fas fa-save mr-2"></i>
+                                    <span>保存草稿</span>
+                                </button>
+                                <button class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded-lg">
+                                    <i class="fas fa-undo mr-2"></i>
+                                    <span>重置表单</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-5">
+                        <h3 class="font-medium text-gray-800 mb-4">导出选项</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="far fa-file-word text-blue-500 text-xl mr-3"></i>
+                                    <span>Word 文档</span>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="far fa-file-pdf text-red-500 text-xl mr-3"></i>
+                                    <span>PDF 文档</span>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="far fa-file-excel text-green-500 text-xl mr-3"></i>
+                                    <span>Excel 表格</span>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-3 rounded-lg mt-4 border border-gray-200">
+                            <div class="flex items-center text-sm text-gray-700 mb-2">
+                                <i class="fas fa-history mr-2 text-blue-600"></i>
+                                <span class="font-medium">历史记录</span>
+                            </div>
+                            <p class="text-xs text-gray-600">共有12个相似文档近期由您或您的团队创建</p>
+                            <button class="text-xs text-blue-600 mt-2 hover:text-blue-800 flex items-center">
+                                <span>查看相似文档</span>
+                                <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

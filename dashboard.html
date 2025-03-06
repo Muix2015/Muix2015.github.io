@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 大模型文档系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%);
+            height: 1280px;
+        }
+        .main-content {
+            height: 1280px;
+            overflow-y: auto;
+        }
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .chart-container {
+            height: 280px;
+            width: 100%;
+        }
+        .nav-item {
+            transition: background-color 0.2s;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .nav-item.active {
+            border-left: 4px solid white;
+        }
+        .quick-action {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .quick-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.07);
+        }
+        .profile-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: #10b981;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex" style="width: 1920px; height: 1280px;">
+        <!-- 侧边栏 -->
+        <div class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 flex items-center space-x-3">
+                <i class="fas fa-file-contract text-2xl"></i>
+                <span class="text-xl font-bold">文档系统</span>
+            </div>
+            
+            <div class="px-4 py-6">
+                <ul class="space-y-2">
+                    <li class="nav-item active">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-home"></i>
+                            <span>首页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-search"></i>
+                            <span>智能检索</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-file-alt"></i>
+                            <span>文档生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-check-circle"></i>
+                            <span>合规审核</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>数据分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-cog"></i>
+                            <span>系统设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="mt-auto p-4">
+                <div class="border-t border-blue-400 pt-4">
+                    <div class="flex items-center space-x-3 p-2">
+                        <div class="relative">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                            <span class="profile-indicator"></span>
+                        </div>
+                        <div>
+                            <p class="font-medium">李明</p>
+                            <p class="text-sm text-blue-200">管理员</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content flex-1 p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-2xl font-bold text-gray-800">首页</h1>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="搜索..." class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    
+                    <div class="relative">
+                        <button class="p-2 rounded-full text-gray-500 hover:bg-gray-100">
+                            <i class="fas fa-bell"></i>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 统计卡片 -->
+            <div class="grid grid-cols-4 gap-6 mb-8">
+                <div class="stat-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-600">文档总数</h3>
+                        <span class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                            <i class="fas fa-file-alt"></i>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">125,431</p>
+                    <p class="text-sm text-green-600 mt-2">
+                        <i class="fas fa-arrow-up"></i> 较上周增长 5.7%
+                    </p>
+                </div>
+                
+                <div class="stat-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-600">本月检索次数</h3>
+                        <span class="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                            <i class="fas fa-search"></i>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">3,842</p>
+                    <p class="text-sm text-green-600 mt-2">
+                        <i class="fas fa-arrow-up"></i> 较上月增长 12.3%
+                    </p>
+                </div>
+                
+                <div class="stat-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-600">已生成文档</h3>
+                        <span class="p-2 bg-green-100 text-green-600 rounded-lg">
+                            <i class="fas fa-file-signature"></i>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">851</p>
+                    <p class="text-sm text-green-600 mt-2">
+                        <i class="fas fa-arrow-up"></i> 较上月增长 8.1%
+                    </p>
+                </div>
+                
+                <div class="stat-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-600">合规审核</h3>
+                        <span class="p-2 bg-yellow-100 text-yellow-600 rounded-lg">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-800">419</p>
+                    <p class="text-sm text-red-600 mt-2">
+                        <i class="fas fa-arrow-down"></i> 较上月减少 2.4%
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 图表和最近活动 -->
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <!-- 使用趋势图表 -->
+                <div class="stat-card p-6 col-span-2">
+                    <h3 class="text-lg font-medium text-gray-700 mb-4">系统使用趋势</h3>
+                    <div class="chart-container">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80" class="w-full h-full object-cover rounded-lg" alt="图表">
+                    </div>
+                </div>
+                
+                <!-- 最近活动 -->
+                <div class="stat-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium text-gray-700">最近活动</h3>
+                        <a href="#" class="text-blue-600 text-sm">查看全部</a>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 bg-blue-100 text-blue-600 rounded-full mt-1">
+                                <i class="fas fa-file-alt text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">张文生成了一份年度报告</p>
+                                <p class="text-sm text-gray-500">10分钟前</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 bg-purple-100 text-purple-600 rounded-full mt-1">
+                                <i class="fas fa-search text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">王丽检索了"2020年科研成果"</p>
+                                <p class="text-sm text-gray-500">25分钟前</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 bg-yellow-100 text-yellow-600 rounded-full mt-1">
+                                <i class="fas fa-check-circle text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">赵峰完成了一份合同审核</p>
+                                <p class="text-sm text-gray-500">1小时前</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 bg-green-100 text-green-600 rounded-full mt-1">
+                                <i class="fas fa-file-signature text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">钱梅生成了研究申请文件</p>
+                                <p class="text-sm text-gray-500">3小时前</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="p-2 bg-red-100 text-red-600 rounded-full mt-1">
+                                <i class="fas fa-exclamation-circle text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">系统发现3份文档需要修订</p>
+                                <p class="text-sm text-gray-500">5小时前</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 快捷操作 -->
+            <div class="mb-8">
+                <h3 class="text-lg font-medium text-gray-700 mb-4">快捷操作</h3>
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="quick-action bg-white shadow rounded-xl p-6 flex flex-col items-center justify-center">
+                        <div class="p-4 bg-blue-100 text-blue-600 rounded-full mb-4">
+                            <i class="fas fa-file-medical text-xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-800 mb-1">新建文档</h4>
+                        <p class="text-sm text-gray-500 text-center">从模板创建新文档</p>
+                    </div>
+                    
+                    <div class="quick-action bg-white shadow rounded-xl p-6 flex flex-col items-center justify-center">
+                        <div class="p-4 bg-purple-100 text-purple-600 rounded-full mb-4">
+                            <i class="fas fa-search-plus text-xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-800 mb-1">高级检索</h4>
+                        <p class="text-sm text-gray-500 text-center">多维度精准查找</p>
+                    </div>
+                    
+                    <div class="quick-action bg-white shadow rounded-xl p-6 flex flex-col items-center justify-center">
+                        <div class="p-4 bg-yellow-100 text-yellow-600 rounded-full mb-4">
+                            <i class="fas fa-file-contract text-xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-800 mb-1">合同审核</h4>
+                        <p class="text-sm text-gray-500 text-center">智能识别合规风险</p>
+                    </div>
+                    
+                    <div class="quick-action bg-white shadow rounded-xl p-6 flex flex-col items-center justify-center">
+                        <div class="p-4 bg-green-100 text-green-600 rounded-full mb-4">
+                            <i class="fas fa-chart-pie text-xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-800 mb-1">数据分析</h4>
+                        <p class="text-sm text-gray-500 text-center">可视化报表生成</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 最近文档 -->
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-700">最近文档</h3>
+                    <a href="#" class="text-blue-600 text-sm">查看全部</a>
+                </div>
+                
+                <div class="bg-white shadow rounded-xl overflow-hidden">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">文档名称</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建者</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-pdf text-red-500 mr-3"></i>
+                                        <span class="text-gray-900">2023年度研究报告</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">张文</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">2023-08-15</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">报告</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 hover:text-green-800"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-word text-blue-500 mr-3"></i>
+                                        <span class="text-gray-900">科研项目申请书</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">钱梅</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">2023-08-14</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">申请</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 hover:text-green-800"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-contract text-yellow-500 mr-3"></i>
+                                        <span class="text-gray-900">技术合作协议</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">赵峰</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">2023-08-12</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">合同</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 hover:text-green-800"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-file-excel text-green-500 mr-3"></i>
+                                        <span class="text-gray-900">季度经费使用统计</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">王丽</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">2023-08-10</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">统计</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800"><i class="fas fa-eye"></i></button>
+                                        <button class="text-green-600 hover:text-green-800"><i class="fas fa-edit"></i></button>
+                                        <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

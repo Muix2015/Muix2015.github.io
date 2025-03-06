@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合规审核 - 大模型文档系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%);
+            height: 1280px;
+        }
+        .main-content {
+            height: 1280px;
+            overflow-y: auto;
+        }
+        .nav-item {
+            transition: background-color 0.2s;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .nav-item.active {
+            border-left: 4px solid white;
+        }
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+        .profile-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: #10b981;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border: 2px solid white;
+        }
+        .compliance-tag {
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .review-card {
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .review-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+        }
+        .status-tag {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .upload-area {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .chart-container {
+            height: 260px;
+        }
+        .ai-badge {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+        }
+        .ai-highlight {
+            position: relative;
+            border-left: 3px solid #3b82f6;
+            padding-left: 12px;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .ai-suggestion {
+            border: 1px solid #93c5fd;
+            background-color: #eff6ff;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .ai-suggestion:hover {
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="flex" style="width: 1920px; height: 1280px;">
+        <!-- 侧边栏 -->
+        <div class="sidebar w-64 flex flex-col text-white">
+            <div class="p-6 flex items-center space-x-3">
+                <i class="fas fa-file-contract text-2xl"></i>
+                <span class="text-xl font-bold">文档系统</span>
+            </div>
+            
+            <div class="px-4 py-6">
+                <ul class="space-y-2">
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-home"></i>
+                            <span>首页</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-search"></i>
+                            <span>智能检索</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-file-alt"></i>
+                            <span>文档生成</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-check-circle"></i>
+                            <span>合规审核</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>数据分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="flex items-center p-3 space-x-3">
+                            <i class="fas fa-cog"></i>
+                            <span>系统设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="mt-auto p-4">
+                <div class="border-t border-blue-400 pt-4">
+                    <div class="flex items-center space-x-3 p-2">
+                        <div class="relative">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="用户头像" class="w-10 h-10 rounded-full">
+                            <span class="profile-indicator"></span>
+                        </div>
+                        <div>
+                            <p class="font-medium">李明</p>
+                            <p class="text-sm text-blue-200">管理员</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content flex-1 p-8">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">合规审核</h1>
+                    <p class="text-gray-600 mt-1">
+                        <span class="ai-badge mr-2">
+                            <i class="fas fa-robot mr-1"></i> AI驱动
+                        </span>
+                        智能合规审核系统，快速识别风险点并提供优化建议
+                    </p>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="搜索文档..." class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    
+                    <div class="relative">
+                        <button class="p-2 rounded-full text-gray-500 hover:bg-gray-100">
+                            <i class="fas fa-bell"></i>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-6">
+                <!-- 左侧：待审核文档列表 -->
+                <div class="col-span-2">
+                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h2 class="text-lg font-medium text-gray-800">待审核文档</h2>
+                                <p class="text-sm text-gray-500">
+                                    <i class="fas fa-magic text-blue-500 mr-1"></i>
+                                    AI已完成智能预检测，自动标记了潜在合规风险
+                                </p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="all">所有文档</option>
+                                    <option value="pending">待审核</option>
+                                    <option value="approved">已批准</option>
+                                    <option value="rejected">已拒绝</option>
+                                    <option value="high_risk">高风险项</option>
+                                </select>
+                                <button class="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm">
+                                    <i class="fas fa-filter mr-1"></i>筛选
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">文档名称</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">提交者</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">提交时间</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-file-contract text-yellow-500 mr-3"></i>
+                                                <div>
+                                                    <div class="text-gray-900 font-medium">2023年度技术合作协议</div>
+                                                    <div class="text-gray-500 text-sm">合同文档</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="用户头像" class="w-8 h-8 rounded-full mr-2">
+                                                <span class="text-gray-700">赵峰</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">2023-08-15 14:30</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-3 py-1 inline-flex items-center bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                                <span class="status-tag bg-yellow-500"></span>审核中
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                    <i class="fas fa-eye mr-1"></i>查看
+                                                </button>
+                                                <button class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                                    <i class="fas fa-check mr-1"></i>批准
+                                                </button>
+                                                <button class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                                    <i class="fas fa-times mr-1"></i>拒绝
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-file-alt text-blue-500 mr-3"></i>
+                                                <div>
+                                                    <div class="text-gray-900 font-medium">研究方案V2.0</div>
+                                                    <div class="text-gray-500 text-sm">研究文档</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/35.jpg" alt="用户头像" class="w-8 h-8 rounded-full mr-2">
+                                                <span class="text-gray-700">王丽</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">2023-08-14 09:15</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-3 py-1 inline-flex items-center bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                                <span class="status-tag bg-yellow-500"></span>审核中
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                    <i class="fas fa-eye mr-1"></i>查看
+                                                </button>
+                                                <button class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                                    <i class="fas fa-check mr-1"></i>批准
+                                                </button>
+                                                <button class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                                    <i class="fas fa-times mr-1"></i>拒绝
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-file-powerpoint text-red-500 mr-3"></i>
+                                                <div>
+                                                    <div class="text-gray-900 font-medium">季度工作汇报</div>
+                                                    <div class="text-gray-500 text-sm">报告文档</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <img src="https://randomuser.me/api/portraits/men/55.jpg" alt="用户头像" class="w-8 h-8 rounded-full mr-2">
+                                                <span class="text-gray-700">张文</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">2023-08-12 16:45</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-3 py-1 inline-flex items-center bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                                <span class="status-tag bg-green-500"></span>已批准
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                    <i class="fas fa-eye mr-1"></i>查看
+                                                </button>
+                                                <button class="text-gray-400 cursor-not-allowed text-sm font-medium">
+                                                    <i class="fas fa-check mr-1"></i>批准
+                                                </button>
+                                                <button class="text-gray-400 cursor-not-allowed text-sm font-medium">
+                                                    <i class="fas fa-times mr-1"></i>拒绝
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-file-invoice text-purple-500 mr-3"></i>
+                                                <div>
+                                                    <div class="text-gray-900 font-medium">设备采购计划</div>
+                                                    <div class="text-gray-500 text-sm">计划文档</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/42.jpg" alt="用户头像" class="w-8 h-8 rounded-full mr-2">
+                                                <span class="text-gray-700">钱梅</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">2023-08-10 11:20</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-3 py-1 inline-flex items-center bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                                                <span class="status-tag bg-red-500"></span>已拒绝
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex space-x-2">
+                                                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                    <i class="fas fa-eye mr-1"></i>查看
+                                                </button>
+                                                <button class="text-gray-400 cursor-not-allowed text-sm font-medium">
+                                                    <i class="fas fa-check mr-1"></i>批准
+                                                </button>
+                                                <button class="text-gray-400 cursor-not-allowed text-sm font-medium">
+                                                    <i class="fas fa-times mr-1"></i>拒绝
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">
+                                显示 1 至 4，共 24 条
+                            </div>
+                            <div class="flex space-x-1">
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">上一页</button>
+                                <button class="px-3 py-1 bg-blue-600 text-white rounded-md">1</button>
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">2</button>
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">3</button>
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">...</button>
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">6</button>
+                                <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50">下一页</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center mb-4">
+                            <h2 class="text-lg font-medium text-gray-800">上传新文档</h2>
+                            <span class="ml-3 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs flex items-center">
+                                <i class="fas fa-bolt mr-1"></i> 智能扫描
+                            </span>
+                        </div>
+                        <div class="ai-highlight mb-4 p-3 rounded-lg">
+                            <p class="text-sm text-gray-700">
+                                <i class="fas fa-lightbulb text-blue-500 mr-1"></i>
+                                提示: 上传文档后，AI将自动扫描内容，检测潜在合规问题并提供修改建议
+                            </p>
+                        </div>
+                        <div class="upload-area flex flex-col items-center justify-center p-8">
+                            <div class="p-4 bg-blue-100 text-blue-600 rounded-full mb-4">
+                                <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                            </div>
+                            <p class="text-gray-600 mb-2">拖拽文件到此处或</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                选择文件
+                            </button>
+                            <p class="text-gray-500 text-sm mt-3">支持 DOC, DOCX, PDF, PPT, XLSX 格式，最大50MB</p>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h3 class="text-md font-medium text-gray-700 mb-3">文档信息</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">文档类型</label>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option>合同文档</option>
+                                        <option>研究报告</option>
+                                        <option>技术文档</option>
+                                        <option>会议记录</option>
+                                        <option>其他</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">紧急程度</label>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option>普通</option>
+                                        <option>加急</option>
+                                        <option>特急</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">说明</label>
+                                <textarea class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="2" placeholder="请简要说明文档的用途和内容..."></textarea>
+                            </div>
+                            
+                            <div class="mt-4 flex justify-end">
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                    提交审核
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧：合规检查和统计 -->
+                <div class="col-span-1">
+                    <!-- 当前审核的文档 -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-medium text-gray-800">当前文档</h2>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-600 rounded text-xs">AI 分析完成</span>
+                        </div>
+                        <div class="review-card bg-blue-50 p-4 rounded-lg mb-4">
+                            <div class="flex items-start mb-3">
+                                <i class="fas fa-file-contract text-blue-500 text-xl mr-3 mt-1"></i>
+                                <div>
+                                    <h3 class="font-medium text-gray-800">2023年度技术合作协议</h3>
+                                    <p class="text-sm text-gray-600">由 赵峰 于 2023-08-15 14:30 提交</p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">合规性评分</span>
+                                    <span class="text-blue-600 font-medium">85/100</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 rounded-full h-2" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div class="bg-white p-3 rounded-lg shadow-sm">
+                                    <p class="text-sm text-gray-600 mb-1">问题数量</p>
+                                    <p class="font-medium text-gray-800">3处</p>
+                                </div>
+                                <div class="bg-white p-3 rounded-lg shadow-sm">
+                                    <p class="text-sm text-gray-600 mb-1">建议修改</p>
+                                    <p class="font-medium text-gray-800">5处</p>
+                                </div>
+                            </div>
+                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium">
+                                查看详情
+                            </button>
+                        </div>
+                        
+                        <h3 class="font-medium text-gray-700 mb-3">
+                            <i class="fas fa-shield-alt text-blue-500 mr-1"></i>
+                            AI检测到的合规问题
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="p-3 border border-yellow-200 bg-yellow-50 rounded-lg">
+                                <div class="flex items-start">
+                                    <span class="p-1 bg-yellow-200 text-yellow-700 rounded-full mr-2 mt-0.5">
+                                        <i class="fas fa-exclamation-triangle text-xs"></i>
+                                    </span>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-800">第12条款存在法律风险</h4>
+                                        <p class="text-xs text-gray-600">知识产权归属表述模糊，可能引发争议</p>
+                                        <div class="mt-2 ai-suggestion p-2">
+                                            <p class="text-xs font-medium text-blue-800">
+                                                <i class="fas fa-magic mr-1"></i>AI建议:
+                                            </p>
+                                            <p class="text-xs text-gray-700 mt-1">明确说明"本协议产生的所有知识产权归属于甲方所有，乙方享有署名权"</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 border border-red-200 bg-red-50 rounded-lg">
+                                <div class="flex items-start">
+                                    <span class="p-1 bg-red-200 text-red-700 rounded-full mr-2 mt-0.5">
+                                        <i class="fas fa-times-circle text-xs"></i>
+                                    </span>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-800">第15条款违反保密规定</h4>
+                                        <p class="text-xs text-gray-600">与组织保密制度第7条相冲突</p>
+                                        <div class="mt-2 ai-suggestion p-2">
+                                            <p class="text-xs font-medium text-blue-800">
+                                                <i class="fas fa-magic mr-1"></i>AI建议:
+                                            </p>
+                                            <p class="text-xs text-gray-700 mt-1">调整为"合同期满后，乙方仍需遵守保密义务，保密期限不少于5年"</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 border border-yellow-200 bg-yellow-50 rounded-lg">
+                                <div class="flex items-start">
+                                    <span class="p-1 bg-yellow-200 text-yellow-700 rounded-full mr-2 mt-0.5">
+                                        <i class="fas fa-exclamation-triangle text-xs"></i>
+                                    </span>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-800">缺少争议解决条款</h4>
+                                        <p class="text-xs text-gray-600">建议添加明确的争议解决机制</p>
+                                        <div class="mt-2 ai-suggestion p-2">
+                                            <p class="text-xs font-medium text-blue-800">
+                                                <i class="fas fa-magic mr-1"></i>AI建议:
+                                            </p>
+                                            <p class="text-xs text-gray-700 mt-1">添加"因本协议引起的争议，双方应协商解决；协商不成的，提交北京仲裁委员会仲裁"</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex space-x-2">
+                            <button class="flex-1 flex items-center justify-center space-x-2 bg-blue-100 hover:bg-blue-200 text-blue-700 py-2 rounded-lg text-sm font-medium">
+                                <i class="fas fa-magic"></i>
+                                <span>AI一键修复</span>
+                            </button>
+                            <button class="flex-1 flex items-center justify-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-medium">
+                                <i class="fas fa-download"></i>
+                                <span>下载审核报告</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 合规审核统计 -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-medium text-gray-800">合规审核统计</h2>
+                            <span class="text-sm text-gray-500">
+                                <i class="fas fa-sync-alt mr-1"></i>实时更新
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-gray-50 p-4 rounded-lg flex flex-col items-center justify-center">
+                                <div class="relative w-20 h-20 mb-2">
+                                    <svg class="progress-ring" width="80" height="80">
+                                        <circle cx="40" cy="40" r="34" stroke="#e5e7eb" stroke-width="6" fill="transparent" />
+                                        <circle cx="40" cy="40" r="34" stroke="#3b82f6" stroke-width="6" fill="transparent" stroke-dasharray="213.628" stroke-dashoffset="42.7256" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center text-lg font-bold text-gray-800">
+                                        80%
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-600">合规率</p>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg flex flex-col items-center justify-center">
+                                <div class="text-2xl font-bold text-gray-800 mb-2">419</div>
+                                <p class="text-sm text-gray-600">已审核文档</p>
+                                <div class="flex items-center text-green-600 text-xs mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>
+                                    <span>较上月增长 12.4%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-highlight p-3 rounded-lg mb-4">
+                            <div class="flex items-center text-sm text-blue-800 mb-2">
+                                <i class="fas fa-chart-line mr-2"></i>
+                                <span class="font-medium">AI智能预测</span>
+                            </div>
+                            <p class="text-xs text-gray-700">根据历史数据分析，预计下月合规率将提升至85%，主要改进来自合同类文档的规范化</p>
+                        </div>
+                        
+                        <h3 class="font-medium text-gray-700 mb-3">审核结果分布</h3>
+                        <div class="chart-container mb-4">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover rounded-lg" alt="审核结果分布图">
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                    <span class="text-gray-700">已批准</span>
+                                </div>
+                                <div class="font-medium text-gray-800">324 (77.3%)</div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                                    <span class="text-gray-700">已拒绝</span>
+                                </div>
+                                <div class="font-medium text-gray-800">65 (15.5%)</div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
+                                    <span class="text-gray-700">审核中</span>
+                                </div>
+                                <div class="font-medium text-gray-800">30 (7.2%)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,181 +1,63 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <script type="text/javascript">
-            var _gaq = _gaq || [];
-            _gaq.push(['_setAccount', 'UA-38205696-1']);
-            _gaq.push(['_trackPageview']);
-            
-            (function() {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-            })();
-        </script>
-        
-        <meta name="viewport" content="width=100%, initial-scale=1" />
-        <title>Shawn's CV</title>
-        <link rel="shortcut icon" href="img/owl.ico" />
-        
-        <link rel="stylesheet" href="vendor/jquery.pagepiling.css" type="text/css" />
-        
-        <link rel="stylesheet" href="css/main.css" type="text/css" />
-    </head>
-    
-    <body>
-        <div id="lang-panel">
-            <a class="lang" href="cn.html">中</a>
-            <a class="lang selected" href="#">En</a>
-        </div>
-        <div id="pagepiling">
-            <div class="section center" id="home">
-                <img id="avatar" src="img/avatar.png" />
-                <h1 id="title">Mi, Shawn Xu</h1>
-                <p id="subtitle">A Passionate, Creative, and Devoted</p>
-                <h4>Web Full Stack Developer @Deloitte</h4>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大模型文档系统 - 原型展示</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f5f7fa;
+        }
+        .preview-container {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            width: 1920px;
+            height: 1280px;
+            transform: scale(0.5);
+            transform-origin: 0 0;
+            margin-bottom: 640px;
+        }
+        h2 {
+            margin-top: 2rem;
+        }
+        .page-title {
+            font-weight: 600;
+            color: #1a202c;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <h1 class="text-3xl font-bold mb-8 text-center">大模型文档系统 - 界面原型</h1>
 
-                <h6><a href="#" target="_blank">Assurance & Digital</a></h6>
-                <p><a href="mailto:smi@deloitte.com.cn">smi@deloitte.com.cn</a></p>
-            </div>
+    <h2 class="page-title text-2xl">登录页面</h2>
+    <div class="preview-container">
+        <iframe src="login.html" width="1920" height="1280" frameborder="0"></iframe>
+    </div>
 
+    <h2 class="page-title text-2xl">首页/仪表盘</h2>
+    <div class="preview-container">
+        <iframe src="dashboard.html" width="1920" height="1280" frameborder="0"></iframe>
+    </div>
 
+    <h2 class="page-title text-2xl">智能检索页面</h2>
+    <div class="preview-container">
+        <iframe src="search.html" width="1920" height="1280" frameborder="0"></iframe>
+    </div>
 
-            <div class="section" id="project">
-                <h1>Projects</h1>
-                <div class="row">
-                    <div class="col-2 center">
-                        <a class="circle-img" href="#" target="_blank">
-                            <img src="img/blog.png" alt="Django Blog" />
-                        </a>
-                    </div>
-                    <div class="col-4">
-                        <h2><a href="#" target="_blank">Django Blog</a></h2>
-                        <p>Personal Blog Design and development with Bootstrap, jQuery and Django Framework.</p>
-                    </div>
-                    <div class="col-2 center">
-                        <a class="circle-img" href="#" target="_blank">
-                            <img src="img/datacurve.png" alt="datacurve" />
-                        </a>
-                    </div>
-                    <div class="col-4">
-                        <h2><a href="#" target="_blank">Data engineering</a></h2>
-                        <p>A data engineering project for data extract, preprocessing, data analysis and <em>visualization</em>.</p>
-                    </div>
-                    <div class="clearboth"></div>
-                </div>
-                <div class="row">
-                    <div class="col-2 center">
-                        <a class="circle-img" href="#" target="_blank">
-                            <img src="img/bigdata.png" alt="bigdata" />
-                        </a>
-                    </div>
-                    <div class="col-4">
-                        <h2><a href="#" target="_blank">Big data Application</a></h2>
-                        <p><em>Develop Financial Big Data Application</em> from indices analysis to financial report .</p>
-                    </div>
-                    <div class="col-2 center">
-                        <a class="circle-img" href="#" target="_blank">
-                            <img src="img/chrome.png" alt="Chrome Extensions" />
-                        </a>
-                    </div>
-                    <div class="col-4">
-                        <h2><a href="#" target="_blank">Online CV</a></h2>
-                        <p>Online Curriculum Vitae to practise my web Front-End skills. </p>
-                    </div>
-                    <div class="clearboth"></div>
-                </div>
-                
-            </div>
-            
-            <div class="section center" id="profession">
-                <h1>Professions</h1>
-                <div class="tag-panel">
-                    <div class="tag expert">HTML5</div>
-                    <div class="tag expert">CSS</div>
-                    <div class="tag">Web design</div>
-                </div>
-                <div class="tag-panel">
-                    <div class="tag expert">JavaScript</div>
-                    <div class="tag familiar">jQuery</div>
-                    <div class="tag familiar">Bootstrap</div>
-                    <div class="tag familiar">ECharts.js</div>
-                </div>
-                <div class="tag-panel">
-                    <div class="tag expert">Python</div>
-                    <div class="tag familiar">Django Framework</div>
-                    <div class="tag familiar">Database</div>
-                </div>
-                <div class="tag-panel">
-                    <div class="tag expert">Java</div>
-                    <div class="tag familiar">Machine Learning</div>
-                    <div class="tag familiar">CV</div>
-                    <div class="tag">NLP</div>
-                </div>
-            </div>
-            
-            <div class="section center">
-                <h1>Education</h1>
-                <h4>Graduated from <em>Shaanxi Normal University</em> with a <em>master's</em> degree</h4>
-                <p>Major in <em>Software Engineering</em></p>
-                <h3><a href="http://isac.snnu.edu.cn/index.htm">Research center of intelligent sensing and advanced computing</a></h3>
-                <p>Research topic related about <em>Robot intelligence</em> and <em>Data Science</em></p>
-                <h4>Graduated from <em>Xidian University</em> with a <em>bachelor's</em> degree</h4>
-                <p>Major in <em>Microelectronic</em></p>
-            </div>
-            
-            <div class="section center">
-                <h1>Work Experience</h1>
+    <h2 class="page-title text-2xl">文档生成页面</h2>
+    <div class="preview-container">
+        <iframe src="document_generator.html" width="1920" height="1280" frameborder="0"></iframe>
+    </div>
 
-                <h4>Process Integration Engineer @CSEC (ChongQing Semi Chip)</h4>
-                <p>July 2011 - May 2013</p>
-                <p>Related technology: Process management, Data Analysis skills</p>
-
-                <h4>Web Front-End Developer intern @Humen Tech </h4>
-                <p>July 2017 - Sep 2017</p>
-                <p>Related technology: Bootstrap, jQuery, Three.js</p>
-
-                <h4>Risk Analyst intern @MSCF (Mashang Consumer Finance Co., Ltd.)</h4>
-                <p>Nov 2017 - Feb 2018</p>
-                <p>Related technology: Data Science, Email automation</p>
-
-                <h4>Web Back-End Developer | Big Data Developer @CYCFC (Shaanxi Changyin Consumer Finance Co., Ltd.)</h4>
-                <p>July 2019 - Apr 2021</p>
-                <p>Related technology: Java, Spring, Database, data engineering</p>
-
-                <h4>Analyst | RPA Developer @Deloitte</h4>
-                <p>May 2021 - now</p>
-                <p>Related technology: RPA</p>
-
-            </div>
-            
-            <div class="section center">
-                <h1>Current Position</h1>
-                <h2>Senior Analyst @Deloitte</h2>
-                <p>In ChongQing, From May 2021</p>
-                <h4>Working on <em>Assuarance & Digital</em></h4>
-                <p>RPA, python, java, inner components development, and etc.</p>
-            </div>
-            
-            <div class="section center">
-                <h1>Learn More</h1>
-                <h2><a href="https://muix2015.github.io/" target="_blank">Personal Website</a> | <a href="https://github.com/Muix2015" target="_blank">Github</a></h2>
-                <p>Email: <a href="mailto:smi@deloitte.com.cn" target="_blank">smi@deloitte.com.cn</a></p>
-
-                <div id="contact-panel">
-                    <a class="social-share-element social-facebook" href="#" target="_blank" title="Follow me on Facebook" onclick="_gaq.push(['_trackEvent', 'Follow', 'Facebook', 'InCv']);"></a>
-                    <a class="social-share-element social-google" href="#" target="_blank" title="Follow me on Google Plus" onclick="_gaq.push(['_trackEvent', 'Follow', 'GPlus', 'InCv']);"></a>
-                    <a class="social-share-element social-twitter" href="#" target="_blank" title="Follow me on Twitter" onclick="_gaq.push(['_trackEvent', 'Follow', 'Twitter', 'InCv']);"></a>
-                    <a class="social-share-element social-digg" href="#" target="_blank" title="Follow me on Digg" onclick="_gaq.push(['_trackEvent', 'Follow', 'Digg', 'InCv']);"></a>
-                    <a class="social-share-element social-weibo" href="https://www.weibo.com/u/3242692532" target="_blank" title="Follow me on Sina Weibo" onclick="_gaq.push(['_trackEvent', 'Follow', 'Weibo', 'InCv']);"></a>
-                    <a class="social-share-element social-douban" href="https://www.douban.com/people/48155124/" target="_blank" title="Follow me on Douban" onclick="_gaq.push(['_trackEvent', 'Follow', 'Douban', 'InCv']);"></a>
-                </div>
-            </div>
-        <link rel="stylesheet" href="css/font.css" type="text/css" />
-        
-        <script type="text/javascript"src="js/jquery-1.11.1.min.js">
-        // <script>window.jQuery || document.write('<script src="js/jquery-1.11.1.min.js"><\/script>');</script>
-        <script type="text/javascript" src="vendor/jquery.pagepiling.min.js"></script>
-        <script type="text/javascript" src="js/index.min.js"></script>
-    </body>
-</html>
+    <h2 class="page-title text-2xl">合规审核页面</h2>
+    <div class="preview-container">
+        <iframe src="compliance_review.html" width="1920" height="1280" frameborder="0"></iframe>
+    </div>
+</body>
+</html> 
